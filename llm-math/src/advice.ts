@@ -3,16 +3,17 @@
  *
  * nodegrove.io's checker renders it in the browser and the MCP server returns it to an AI
  * client, so both give the same verdict, the same alternatives and the same sentences.
- * Every alternative is computed with the formulas in vram.ts and speed.ts and the headroom
- * rules in gpu-fit.ts: nothing is suggested that the arithmetic has not checked.
+ * Every alternative is computed with the formulas in vram.ts and speed.ts and the fit
+ * rule in gpu-fit.ts: nothing is suggested that the arithmetic has not checked.
  *
  * Suggestion text is plain sentences with two marks: **bold** and [label](link). The page
  * turns them into HTML; an AI client reads them as Markdown.
  */
-import { estimate, quants, maxContextTokens, denseEquivalentB, round1, type KvShape, type QuantKey, type Estimate } from './vram.ts';
+import { estimate, quants, quantOf, maxContextTokens, denseEquivalentB, round1, type KvShape, type QuantKey, type Estimate } from './vram.ts';
 import { tokensPerSecond, describeSpeed, isCeiling } from './speed.ts';
-import { HEADROOM, TIGHT, MAX_CONTEXT } from './gpu-fit.ts';
-import { usableVramGb, type GpuSpec } from './gpus.ts';
+import { budgetOf, fitVerdict, MAX_CONTEXT, TIGHT, type Verdict } from './gpu-fit.ts';
+import type { CheckCard } from './gpus.ts';
+export { cardOf, type CheckCard } from './gpus.ts';
 
 /** What the check needs to know about a model. Every ModelSpec row qualifies, and so does a custom shape. */
 export interface CheckModel extends KvShape {
@@ -20,24 +21,11 @@ export interface CheckModel extends KvShape {
   name: string;
   /** Total parameters, billions. */
   params: number;
-  /** Active parameters per token, billions (mixture-of-experts only). */
-  active?: number;
-  /** Native context window, tokens. */
-  ctx: number;
+  /** Active parameters per token, billions, for a mixture-of-experts model; null when nobody stated them, and then no speed is given. */
+  active?: number | null;
+  /** Native context window, tokens. Absent when unknown: then no window caps the search, and none is exceeded. */
+  ctx?: number;
 }
-
-/** A card as the check sees it. */
-export interface CheckCard {
-  id: string;
-  name: string;
-  vramGb: number;
-  /** Memory a runtime can address: usableVramGb() for a listed card. */
-  usableGb: number;
-  /** GB/s. Null when unknown, and then no speed is given. */
-  bandwidthGBs: number | null;
-}
-
-export const cardOf = (g: GpuSpec): CheckCard => ({ id: g.id, name: g.name, vramGb: g.vramGb, usableGb: usableVramGb(g), bandwidthGBs: g.bandwidthGBs });
 
 export type SuggestionKind =
   | 'lower-quant' | 'kv-q8' | 'shorter-context' | 'no-context' | 'near-miss-card' | 'smallest-card' | 'biggest-model'
@@ -53,20 +41,20 @@ export interface Suggestion {
   modelId?: string;
   /** Memory the suggested setup needs, GB. */
   needGb?: number;
+  /** Speed ceiling of the suggested model on this card, when the bandwidth is known. */
   tokensPerSecond?: number;
 }
 
 export interface CheckResult {
-  verdict: 'fits' | 'tight' | 'no';
+  verdict: Verdict;
   need: Estimate;
   /** The same total with the KV cache at Q8. */
   needQ8KvGb: number;
-  usableGb: number;
   /** The line a model must fit under: usable memory × HEADROOM. */
   budgetGb: number;
   /** Budget minus need: spare when positive, short by when negative. */
   marginGb: number;
-  /** Single-stream decode ceiling when it fits and the bandwidth is known. */
+  /** Single-stream decode ceiling when it fits and the speed is knowable. */
   tokensPerSecond: number | null;
   feels: string | null;
   /** Longest context that fits at these settings, tokens. 0 when the weights alone do not fit. */
@@ -74,8 +62,9 @@ export interface CheckResult {
   /** The context asked for is longer than the model's native window: the memory figure is hypothetical. */
   beyondNativeWindow: boolean;
   suggestions: Suggestion[];
-  /** On a "no": the smallest of `groveGb` that holds the model exactly as asked. */
+  /** On a "no": the smallest of `groveGb` that holds the model exactly as asked, and the sentence that says so. */
   groveGb: number | null;
+  groveText: string | null;
 }
 
 export interface CheckOptions {
@@ -85,11 +74,20 @@ export interface CheckOptions {
   groveGb?: readonly number[];
 }
 
-const gb = (n: number) => `${round1(n)} GB`;
-const tok = (n: number) => n.toLocaleString('en-US');
-const quantOf = (key: QuantKey) => quants.find((x) => x.key === key) ?? quants[4];
+/** "45.8 GB": one decimal, as every page shows memory. */
+export const gb = (n: number) => `${round1(n)} GB`;
+/** "8,192": token counts as the pages print them. */
+export const tok = (n: number) => n.toLocaleString('en-US');
 /** "~42 tokens/s", or "at most 369 tokens/s" where the figure is only a ceiling. */
 export const speedText = (tps: number) => `${isCeiling(tps) ? 'at most ' : '~'}${Math.round(tps)} tokens/s`;
+/** The verdict as the checker's badge and the MCP server's summary say it. */
+export const verdictLabel = (v: Verdict) => (v === 'fits' ? 'Yes' : v === 'tight' ? 'Yes, but tight' : 'No');
+/** "Llama 3.3 70B at Q4_K_M with 8,192 tokens of context". */
+export const settingsPhrase = (model: string, quant: QuantKey, context: number) => `${model} at ${quantOf(quant).label} with ${tok(context)} tokens of context`;
+export const beyondWindowNote = (context: number, nativeCtx: number) =>
+  `${tok(context)} tokens is beyond this model's native ${tok(nativeCtx)}-token window, so the memory figure is hypothetical`;
+
+const link = (name: string, href: string | null | undefined) => (href ? `[${name}](${href})` : name);
 
 export function check(
   input: { model: CheckModel; card: CheckCard; quant: QuantKey; context: number; kvBytes?: number },
@@ -100,24 +98,20 @@ export function check(
   const q = quantOf(input.quant);
   const kvBytes = input.kvBytes ?? 2;
   const need = (x: CheckModel, quant: QuantKey, kv: number) => estimate({ ...x, quant, context, kvBytes: kv });
-  const budget = (c: CheckCard) => c.usableGb * HEADROOM;
-  const tps = (x: CheckModel, c: CheckCard) => (c.bandwidthGBs ? tokensPerSecond(x.active ?? x.params, q.bytes, c.bandwidthGBs) : null);
+  const budget = (c: CheckCard) => budgetOf(c.usableGb);
+  const tps = (x: CheckModel, c: CheckCard) => (c.bandwidthGBs && x.active !== null ? tokensPerSecond(x.active ?? x.params, q.bytes, c.bandwidthGBs) : null);
   const withSpeed = (t: number | null) => (t === null ? '' : ` at ${speedText(t)}`);
   // The checker offers contexts up to MAX_CONTEXT; a longer one asked for is searched up to itself.
+  const searchCap = Math.max(MAX_CONTEXT, context);
   const maxCtx = (x: CheckModel, quant: QuantKey, kv: number) =>
-    maxContextTokens(x, quant, budget(g), kv, Math.min(Math.max(MAX_CONTEXT, context), x.ctx));
-  const modelLink = (x: CheckModel) => {
-    const href = options.links?.model?.(x.id);
-    return href ? `[${x.name}](${href})` : x.name;
-  };
-  const cardLink = (c: CheckCard) => {
-    const href = options.links?.card?.(c.id);
-    return href ? `[${c.name}](${href})` : c.name;
-  };
+    maxContextTokens(x, quant, budget(g), kv, x.ctx === undefined ? searchCap : Math.min(searchCap, x.ctx));
+  const modelLink = (x: CheckModel) => link(x.name, options.links?.model?.(x.id));
+  const cardLink = (c: CheckCard) => link(c.name, options.links?.card?.(c.id));
 
   const e = need(m, q.key, kvBytes);
-  const fits = e.totalGb <= budget(g);
-  const tight = fits && e.totalGb > g.usableGb * TIGHT;
+  const q8 = need(m, q.key, 1).totalGb;
+  const verdict = fitVerdict(e.totalGb, g.usableGb);
+  const fits = verdict !== 'no';
   const mc = maxCtx(m, q.key, kvBytes);
   const speed = fits ? tps(m, g) : null;
   const tips: Suggestion[] = [];
@@ -128,17 +122,13 @@ export function check(
       const n = need(m, lower.key, kvBytes).totalGb;
       tips.push({ kind: 'lower-quant', quant: lower.key, needGb: n, text: `Switch to **${lower.label}** — ${gb(n)}, which fits. Smaller quantisations cost accuracy; ${lower.key === 'q3' ? 'Q3 costs enough that a smaller model at Q4 is usually the better trade' : 'this one is a mild step'}.` });
     }
-    if (kvBytes === 2) {
-      const n = need(m, q.key, 1).totalGb;
-      if (n <= budget(g)) tips.push({ kind: 'kv-q8', needGb: n, text: `Quantise the **KV cache to Q8** — ${gb(n)}, which fits. Most people never notice the difference.` });
-    }
+    if (kvBytes === 2 && q8 <= budget(g)) tips.push({ kind: 'kv-q8', needGb: q8, text: `Quantise the **KV cache to Q8** — ${gb(q8)}, which fits. Most people never notice the difference.` });
     if (mc >= 1024) tips.push({ kind: 'shorter-context', context: mc, text: `Keep ${q.label} but drop the context to **${tok(mc)} tokens**, the most this card holds for this model.` });
     else tips.push({ kind: 'no-context', needGb: e.weightsGb + e.overheadGb, text: `No context length helps: the weights alone are ${gb(e.weightsGb + e.overheadGb)} before a single token of conversation.` });
 
     const smallest = catalog.cards.filter((c) => e.totalGb <= budget(c)).sort((a, b) => a.usableGb - b.usableGb)[0];
     // A card that clears the raw memory but not the headroom is worth naming: headless,
     // or with a Q8 KV cache, it genuinely runs.
-    const q8 = need(m, q.key, 1).totalGb;
     const nearMiss = catalog.cards
       .filter((c) => c.usableGb > g.usableGb && e.totalGb > budget(c) && q8 <= budget(c))
       .sort((a, b) => a.usableGb - b.usableGb)[0];
@@ -169,22 +159,24 @@ export function check(
       const t = tps(larger, g);
       tips.push({ kind: 'larger-model', modelId: larger.id, needGb: n, tokensPerSecond: t ?? undefined, text: `You could run a larger model: **${modelLink(larger)}** at ${gb(n)}${t === null ? '' : `, ${speedText(t)}`}.` });
     }
-    if (tight) tips.push({ kind: 'tight', text: `It fits, but above ${Math.round(TIGHT * 100)}% of memory. On a card with a display attached, treat this as a maybe — the desktop wants 0.5 to 2 GB of the same memory.` });
+    if (verdict === 'tight') tips.push({ kind: 'tight', text: `It fits, but above ${Math.round(TIGHT * 100)}% of memory. On a card with a display attached, treat this as a maybe — the desktop wants 0.5 to 2 GB of the same memory.` });
     if (mc > context) tips.push({ kind: 'longer-context', context: mc, text: `You can push the context to **${tok(mc)} tokens** before it stops fitting.` });
   }
 
+  const groveGb = fits ? null : (options.groveGb?.find((x) => e.totalGb <= budgetOf(x)) ?? null);
   return {
-    verdict: fits ? (tight ? 'tight' : 'fits') : 'no',
+    verdict,
     need: e,
-    needQ8KvGb: need(m, q.key, 1).totalGb,
-    usableGb: g.usableGb,
+    needQ8KvGb: q8,
     budgetGb: budget(g),
     marginGb: budget(g) - e.totalGb,
     tokensPerSecond: speed,
     feels: speed === null ? null : describeSpeed(speed),
     maxContext: mc,
-    beyondNativeWindow: context > m.ctx,
+    beyondNativeWindow: m.ctx !== undefined && context > m.ctx,
     suggestions: tips,
-    groveGb: fits ? null : (options.groveGb?.find((x) => e.totalGb <= x * HEADROOM) ?? null),
+    groveGb,
+    groveText:
+      groveGb === null ? null : `${settingsPhrase(m.name, q.key, context)} needs ${gb(e.totalGb)}, which fits the ${groveGb} GB GPU a Nodegrove workspace attaches.`,
   };
 }

@@ -75,4 +75,7 @@ test('checker links only for states the checker can show', () => {
     'https://nodegrove.io/tools/llm-vram-calculator?model=custom&p=8&l=32&kvh=8&hd=128&quant=q4&kv=2&ctx=8192',
   );
   assert.equal(calculatorUrl({ model: 'qwen3-32b', quant: 'q4', kvBytes: 2, context: 1024 }), null);
+  // The calculator's custom fields describe a plain transformer only.
+  const hybrid = { params: 27.8, layers: 64, kvHeads: 4, headDim: 256, kv: [{ layers: 16, width: 2048 }], stateGb: 0.15 };
+  assert.equal(calculatorUrl({ model: hybrid, quant: 'q4', kvBytes: 2, context: 8192 }), null);
 });

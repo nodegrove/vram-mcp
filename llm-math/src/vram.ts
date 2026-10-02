@@ -27,7 +27,8 @@
  * Results are estimates. Real usage moves with the runtime, batch size, flash attention,
  * and KV quantisation. Treat the "fits" verdict as "worth trying", not "guaranteed".
  */
-export type QuantKey = 'fp16' | 'q8' | 'q6' | 'q5' | 'q4' | 'q3';
+export const QUANT_KEYS = ['fp16', 'q8', 'q6', 'q5', 'q4', 'q3'] as const;
+export type QuantKey = (typeof QUANT_KEYS)[number];
 
 export const quants: { key: QuantKey; label: string; bytes: number; hint: string }[] = [
   { key: 'fp16', label: 'FP16 / BF16', bytes: 2.0, hint: 'full precision, best quality, largest' },
@@ -37,6 +38,21 @@ export const quants: { key: QuantKey; label: string; bytes: number; hint: string
   { key: 'q4', label: 'Q4_K_M', bytes: 0.58, hint: 'the common default; small quality loss' },
   { key: 'q3', label: 'Q3_K_M', bytes: 0.47, hint: 'noticeable loss; last resort' },
 ];
+
+/** A quantisation by key; an unknown key reads as Q4_K_M, the common default. */
+export const quantOf = (key: QuantKey) => quants.find((q) => q.key === key) ?? quants[4]!;
+
+/** KV cache precision: bytes per cached value. */
+export const kvCaches = [
+  { key: 'fp16', label: 'FP16', bytes: 2 },
+  { key: 'q8', label: 'Q8', bytes: 1 },
+] as const;
+export type KvCacheKey = (typeof kvCaches)[number]['key'];
+
+/** Leave 5% for the desktop, the runtime and fragmentation: a model fits at or under this share of usable memory. */
+export const HEADROOM = 0.95;
+/** Above this share of usable memory, a fit is real but has no room to grow. */
+export const TIGHT = 0.85;
 
 /** A set of layers that cache the same way. */
 export interface KvGroup {
@@ -76,6 +92,9 @@ export function kvPerTokenGb(m: KvShape, kvBytes = 2): number {
   return (values * kvBytes) / 1e9;
 }
 
+/** What each 1,000 more tokens cost, in GB to three decimals: the figure the pages, the dataset and the MCP server publish. */
+export const kvGbPer1kTokens = (m: KvShape, kvBytes = 2) => Math.round(kvPerTokenGb(m, kvBytes) * 1000 * 1000) / 1000;
+
 export const overheadGb = (weightsGb: number) => 0.5 + weightsGb * 0.04;
 
 export interface EstimateInput extends KvShape {
@@ -93,8 +112,7 @@ export interface Estimate {
 }
 
 export function estimate(i: EstimateInput): Estimate {
-  const q = quants.find((x) => x.key === i.quant) ?? quants[4];
-  const weightsGb = i.params * q.bytes;
+  const weightsGb = i.params * quantOf(i.quant).bytes;
   const kvGb = kvCacheGb(i, i.context, i.kvBytes ?? 2);
   const overhead = overheadGb(weightsGb);
   return { weightsGb, kvGb, overheadGb: overhead, totalGb: weightsGb + kvGb + overhead };
@@ -107,8 +125,7 @@ export function estimate(i: EstimateInput): Estimate {
  * makes the cache piecewise-linear in context.
  */
 export function maxContextTokens(m: KvShape & { params: number }, quant: QuantKey, budgetGb: number, kvBytes = 2, cap = 131072): number {
-  const q = quants.find((x) => x.key === quant) ?? quants[4];
-  const weights = m.params * q.bytes;
+  const weights = m.params * quantOf(quant).bytes;
   const spare = budgetGb - weights - overheadGb(weights);
   if (spare <= 0 || kvCacheGb(m, 1024, kvBytes) > spare) return 0;
   let lo = 1, hi = Math.floor(cap / 1024);
@@ -127,13 +144,13 @@ export function maxContextTokens(m: KvShape & { params: number }, quant: QuantKe
  * thumb, and the pages say so. Lives here, not in gpu-fit.ts, so the browser tools
  * can import it without pulling the whole data set into their bundle.
  */
-export function denseEquivalentB(m: { params: number; active?: number }): number {
+export function denseEquivalentB(m: { params: number; active?: number | null }): number {
   return m.active ? Math.sqrt(m.params * m.active) : m.params;
 }
 
-/** Smallest tier the estimate fits into with ~5% headroom, or null. */
-export function fitsTier(totalGb: number, tiers: readonly { label: string; gb: number }[]): { label: string; gb: number } | null {
-  for (const t of tiers) if (totalGb <= t.gb * 0.95) return t;
+/** Smallest tier the estimate fits into, under the same headroom as every fit check, or null. */
+export function fitsTier<T extends { label: string; gb: number }>(totalGb: number, tiers: readonly T[]): T | null {
+  for (const t of tiers) if (totalGb <= t.gb * HEADROOM) return t;
   return null;
 }
 

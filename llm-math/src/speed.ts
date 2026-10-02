@@ -35,9 +35,12 @@ export function tokensPerSecond(activeParamsB: number, bytesPerParam: number, ba
   return (efficiency * bandwidthGBs) / activeGb;
 }
 
+/** The speed at which a model is comfortable for chat; the recommended model on a card must reach it. */
+export const CHAT_TPS = 25;
+
 export function describeSpeed(tps: number): string {
   if (tps >= 60) return 'faster than you can read';
-  if (tps >= 25) return 'comfortable for chat';
+  if (tps >= CHAT_TPS) return 'comfortable for chat';
   if (tps >= 12) return 'usable, a little slow';
   if (tps >= 5) return 'slow; fine for batch jobs';
   return 'too slow for interactive use';

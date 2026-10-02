@@ -80,10 +80,33 @@ export const gpus: GpuSpec[] = [
 export const APPLE_GPU_SHARE = 0.75;
 
 /** Memory an inference runtime can actually address on this card. */
-export function usableVramGb(g: GpuSpec): number {
+export function usableVramGb(g: Pick<GpuSpec, 'kind' | 'vramGb' | 'gpuMemory'>): number {
   if (g.kind === 'apple') return g.vramGb * APPLE_GPU_SHARE;
   return g.gpuMemory?.gb ?? g.vramGb;
 }
+
+/** A card as the fit checks see it: the memory a runtime can address, and the bandwidth when it is known. */
+export interface CheckCard {
+  id: string;
+  name: string;
+  vramGb: number;
+  /** usableVramGb() of the card. */
+  usableGb: number;
+  /** GB/s. Null when unknown, and then no speed is given. */
+  bandwidthGBs: number | null;
+}
+
+/** A listed card, or any card described by the same facts, as the fit checks see it. */
+export const cardOf = (g: Pick<GpuSpec, 'id' | 'name' | 'kind' | 'vramGb' | 'gpuMemory'> & { bandwidthGBs: number | null }): CheckCard => ({
+  id: g.id,
+  name: g.name,
+  vramGb: g.vramGb,
+  usableGb: usableVramGb(g),
+  bandwidthGBs: g.bandwidthGBs,
+});
+
+/** A card's name as people type it into a search box, without the memory: "RTX 3090 24 GB" -> "RTX 3090". */
+export const queryName = (name: string) => name.replace(/\s+\d+\s*GB$/, '');
 
 /** Where a page says the bandwidth figure comes from: lead-in text, then the linked source. */
 export function bandwidthCitation(g: GpuSpec): { lead: string; label: string; url: string } | null {

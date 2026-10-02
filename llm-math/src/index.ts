@@ -15,3 +15,4 @@ export * from './gpus.ts';
 export * from './advice.ts';
 export * from './method.ts';
 export * from './nodegrove.ts';
+export * from './hf-config.ts';

@@ -2,15 +2,15 @@
  * The method in sentences, built from the constants it describes, so the words cannot
  * drift from the arithmetic. The MCP server attaches these to every answer.
  */
-import { overheadGb, quants } from './vram.ts';
-import { EFFICIENCY, SPEED_CAVEAT } from './speed.ts';
-import { HEADROOM, TIGHT } from './gpu-fit.ts';
+import { overheadGb, quants, HEADROOM, TIGHT } from './vram.ts';
+import { EFFICIENCY, SPEED_CAVEAT, CHAT_TPS } from './speed.ts';
 import { APPLE_GPU_SHARE } from './gpus.ts';
 
-const pct = (x: number) => `${Math.round(x * 100)}%`;
-/** Read off overheadGb() rather than typed a second time. */
-const OVERHEAD_FIXED_GB = overheadGb(0);
-const OVERHEAD_SHARE = (overheadGb(100) - overheadGb(0)) / 100;
+/** "95%". */
+export const pct = (x: number) => `${Math.round(x * 100)}%`;
+/** The two parts of overheadGb(), read off it rather than typed a second time. */
+export const OVERHEAD_FIXED_GB = overheadGb(0);
+export const OVERHEAD_SHARE = Math.round(overheadGb(100) - overheadGb(0)) / 100;
 
 export const METHOD = {
   memory:
@@ -21,6 +21,9 @@ export const METHOD = {
     `Fits = total at or under ${pct(HEADROOM)} of the memory a runtime can address; "tight" above ${pct(TIGHT)}. ` +
     `Apple silicon gives the GPU about ${pct(APPLE_GPU_SHARE)} of unified memory by default.`,
   speed: `Speed = ${EFFICIENCY} × memory bandwidth ÷ bytes of active weights read per token, single stream, decode only. ${SPEED_CAVEAT}`,
+  recommended:
+    `The recommended model is the biggest class of general-purpose model that fits with room for context and generates at ${CHAT_TPS}+ tokens/s, newest first. ` +
+    'Mixture-of-experts models count at their dense equivalent, the geometric mean of total and active parameters.',
   estimate:
     'Estimates from stated formulas over each model\'s config.json and the makers\' specs, never benchmarks. Real usage moves with the runtime, ' +
     'batch size, flash attention and KV quantisation: read "fits" as "worth trying", not "guaranteed".',

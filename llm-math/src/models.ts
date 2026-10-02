@@ -67,12 +67,18 @@ export interface ModelSpec {
  * (Llama) show the card to everyone and config.json once the licence is accepted.
  */
 const GATED = /^(meta-llama\/|google\/gemma-3-)/;
+
+/** A Hugging Face repo's model card and config.json, as pages link them. */
+export const hfLinks = (repo: string) => ({
+  card: `https://huggingface.co/${repo}`,
+  config: `https://huggingface.co/${repo}/blob/main/config.json`,
+});
+
 export function sourceLinks(m: ModelSpec) {
   const repo = m.source.split(' ')[0];
   return {
     repo,
-    card: `https://huggingface.co/${repo}`,
-    config: `https://huggingface.co/${repo}/blob/main/config.json`,
+    ...hfLinks(repo),
     gated: GATED.test(repo),
     usesCard: m.source.includes('model card'),
   };
@@ -199,6 +205,8 @@ export const models: ModelSpec[] = [
 ];
 
 export const modelById = (id: string) => models.find((m) => m.id === id);
+/** The row read from this Hugging Face repo, if any; repo ids are case-insensitive on the Hub. */
+export const modelByRepo = (repo: string) => models.find((m) => sourceLinks(m).repo.toLowerCase() === repo.toLowerCase());
 
 export const gpuTiers = [
   { label: '8 GB', gb: 8, examples: 'RTX 3070, 4060, most gaming laptops' },
