@@ -1,0 +1,14 @@
+// The public endpoint, https://mcp.nodegrove.io/mcp. Deploy: npx wrangler deploy (from this folder).
+// To run your own copy, change the route to a domain on your Cloudflare account, or delete it
+// and use the workers.dev address.
+{
+  "name": "nodegrove-mcp",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+  "routes": [{ "pattern": "mcp.nodegrove.io", "custom_domain": true }],
+  // 120 requests a minute per address keeps the endpoint free for everyone.
+  "ratelimits": [{ "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
+  // No request logs: tool arguments never leave the request that carries them.
+  "observability": { "enabled": false }
+}

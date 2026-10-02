@@ -1,0 +1,56 @@
+{
+  "name": "@nodegrove/vram-mcp",
+  "version": "1.0.0",
+  "description": "MCP server: can this open LLM run on my GPU? VRAM, KV cache, speed ceilings and what would fit instead, with the exact math nodegrove.io uses. Any Hugging Face repo, any GPU.",
+  "type": "module",
+  "license": "(MIT AND CC-BY-4.0)",
+  "author": "Nodegrove <info@nodegrove.io> (https://nodegrove.io)",
+  "homepage": "https://nodegrove.io/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodegrove/vram-mcp.git",
+    "directory": "mcp"
+  },
+  "bugs": "https://github.com/nodegrove/vram-mcp/issues",
+  "mcpName": "io.nodegrove/vram-mcp",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "llm",
+    "vram",
+    "gpu",
+    "local-llm",
+    "hugging-face",
+    "kv-cache"
+  ],
+  "bin": {
+    "vram-mcp": "dist/stdio.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE-DATA.md"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc -p .",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.2.0",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.2.0",
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.27.7",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.130.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
