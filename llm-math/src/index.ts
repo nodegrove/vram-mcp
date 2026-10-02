@@ -12,3 +12,6 @@ export * from './speed.ts';
 export * from './gpu-fit.ts';
 export * from './models.ts';
 export * from './gpus.ts';
+export * from './advice.ts';
+export * from './method.ts';
+export * from './nodegrove.ts';
