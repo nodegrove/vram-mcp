@@ -1,0 +1,32 @@
+{
+  "name": "@nodegrove/llm-math",
+  "version": "1.0.0",
+  "description": "How much VRAM an open LLM needs and how fast it can run on a GPU: the memory, KV-cache and speed arithmetic behind nodegrove.io, with model data read from config.json and GPU specs from the makers.",
+  "type": "module",
+  "license": "(MIT AND CC-BY-4.0)",
+  "author": "Nodegrove <info@nodegrove.io> (https://nodegrove.io)",
+  "homepage": "https://nodegrove.io/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodegrove/vram-mcp.git",
+    "directory": "llm-math"
+  },
+  "bugs": "https://github.com/nodegrove/vram-mcp/issues",
+  "keywords": [
+    "llm",
+    "vram",
+    "gpu",
+    "kv-cache",
+    "local-llm",
+    "quantization",
+    "calculator"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc -p ."
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
