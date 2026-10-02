@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.nodegrove/vram-mcp",
+  "title": "Nodegrove VRAM: can I run it?",
+  "description": "Can this LLM run on my GPU? VRAM, speed ceiling and what fits instead, for any model and GPU.",
+  "version": "1.0.0",
+  "websiteUrl": "https://nodegrove.io/mcp",
+  "repository": {
+    "url": "https://github.com/nodegrove/vram-mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://nodegrove.io/icon-512.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.nodegrove.io/mcp"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@nodegrove/vram-mcp",
+      "version": "1.0.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
