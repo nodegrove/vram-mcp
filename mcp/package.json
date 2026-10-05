@@ -1,6 +1,6 @@
 {
   "name": "@nodegrove/vram-mcp",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "MCP server: can this open LLM run on my GPU? VRAM, KV cache, speed ceilings and what would fit instead, with the exact math nodegrove.io uses. Any Hugging Face repo, any GPU.",
   "type": "module",
   "license": "(MIT AND CC-BY-4.0)",
