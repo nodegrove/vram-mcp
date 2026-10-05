@@ -91,9 +91,11 @@ export function sourceLinks(m: ModelSpec) {
  * `node scripts/hf-verify.mjs` passes. 2026-09-25: every row re-read from config.json
  * (29 of 29 unchanged), every model card and GPU spec page resolves; no new model from
  * the tracked labs fits a single card this week (DeepSeek V4.1 Flash and GLM-5.3 are
- * rack-class, Qwen-Image 2.1 is for the create cluster).
+ * rack-class, Qwen-Image 2.1 is for the create cluster). 2026-10-06: Muse Glimmer 30B added
+ * from its config.json; hf-verify 30 of 30, 52 links. Qwen3.8-Flash-Next is left out: its
+ * 51B n-gram embedding is meant to sit in system memory, which this math does not model.
  */
-export const MODELS_UPDATED = '2026-09-25';
+export const MODELS_UPDATED = '2026-10-06';
 
 const VISION = 'The parameter count includes the vision encoder; a text-only GGUF is slightly smaller.';
 
@@ -153,6 +155,12 @@ export const models: ModelSpec[] = [
     kv: [{ layers: 16, width: 2048 }], stateGb: 0.15,
     arch: '64 layers, of which only 16 are full attention (4 KV heads of dimension 256) and keep a cache that grows with the conversation; the other 48 are Gated DeltaNet linear-attention layers with a fixed state of about 0.15 GB',
     released: '2026-08', ctx: 262144, license: 'apache', note: VISION, source: 'Qwen/Qwen3.8-27B config.json',
+  },
+  {
+    id: 'muse-glimmer-30b', name: 'Muse Glimmer 30B', family: 'Muse', params: 29.8, layers: 52, kvHeads: 2, headDim: 128,
+    kv: [{ layers: 13, width: 512 }, { layers: 39, width: 512, window: 2048 }],
+    arch: '52 layers: 39 use sliding-window attention over the last 2,048 tokens and 13 are full attention, all with 2 KV heads of dimension 128',
+    released: '2026-08', ctx: 131072, license: 'apache', note: VISION, source: 'meta-models/Muse-Glimmer-30B config.json',
   },
   { id: 'qwen3-30b-a3b', name: 'Qwen3 30B-A3B (MoE)', family: 'Qwen', params: 30.5, active: 3.3, layers: 48, kvHeads: 4, headDim: 128, released: '2025-04', ctx: 40960, license: 'apache', successor: 'qwen3.6-35b-a3b', note: 'All experts stay in memory; only 3.3B are active per token, so it is fast for its size.', source: 'Qwen/Qwen3-30B-A3B config.json' },
   {
