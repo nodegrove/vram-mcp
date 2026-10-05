@@ -44,107 +44,25 @@ https://mcp.nodegrove.io/mcp
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=nodegrove-vram&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.nodegrove.io%2Fmcp%22%7D)
 [![Add to LM Studio](https://files.lmstudio.ai/deeplink/mcp-install-light.svg)](https://lmstudio.ai/install-mcp?name=nodegrove-vram&config=eyJ1cmwiOiJodHRwczovL21jcC5ub2RlZ3JvdmUuaW8vbWNwIn0%3D)
 
-<details>
-<summary><b>Claude</b> (claude.ai and the desktop app)</summary>
-
-Customize → Connectors → Add → Add custom connector. Name it `Nodegrove VRAM`, paste the URL, choose **No sign-in**, then turn it on in a chat from **+ → Connectors**.
-</details>
-
-<details>
-<summary><b>Claude Code</b></summary>
-
 ```sh
+# Claude Code (add --scope user to have it in every project)
 claude mcp add --transport http nodegrove-vram https://mcp.nodegrove.io/mcp
-```
 
-Add `--scope user` to have it in every project.
-</details>
-
-<details>
-<summary><b>Cursor</b></summary>
-
-`~/.cursor/mcp.json`:
-
-```json
-{ "mcpServers": { "nodegrove-vram": { "url": "https://mcp.nodegrove.io/mcp" } } }
-```
-</details>
-
-<details>
-<summary><b>VS Code</b></summary>
-
-`.vscode/mcp.json`:
-
-```json
-{ "servers": { "nodegrove-vram": { "type": "http", "url": "https://mcp.nodegrove.io/mcp" } } }
-```
-</details>
-
-<details>
-<summary><b>Devin Desktop</b> (formerly Windsurf)</summary>
-
-```sh
-devin mcp add -s user nodegrove-vram https://mcp.nodegrove.io/mcp
-```
-</details>
-
-<details>
-<summary><b>LM Studio</b></summary>
-
-Program → Install → Edit `mcp.json`:
-
-```json
-{ "mcpServers": { "nodegrove-vram": { "url": "https://mcp.nodegrove.io/mcp" } } }
-```
-</details>
-
-<details>
-<summary><b>Open WebUI</b></summary>
-
-Admin Settings → Integrations → External Tool Servers → Add Connection. Type **MCP (Streamable HTTP)**, the URL above, authentication **None**.
-</details>
-
-<details>
-<summary><b>Cline</b></summary>
-
-The type must be stated, or Cline treats a URL as the older SSE transport:
-
-```json
-{ "mcpServers": { "nodegrove-vram": { "type": "streamableHttp", "url": "https://mcp.nodegrove.io/mcp" } } }
-```
-</details>
-
-<details>
-<summary><b>Codex CLI</b></summary>
-
-```sh
+# Codex CLI
 codex mcp add nodegrove-vram --url https://mcp.nodegrove.io/mcp
-```
-</details>
 
-<details>
-<summary><b>Gemini CLI</b></summary>
-
-```sh
+# Gemini CLI
 gemini mcp add -s user --transport http nodegrove-vram https://mcp.nodegrove.io/mcp
 ```
-</details>
 
-<details>
-<summary><b>Zed</b></summary>
+- **Claude** (claude.ai and the desktop app): Customize → Connectors → Add → Add custom connector. Name it `Nodegrove VRAM`, paste the URL, choose **No sign-in**, then turn it on in a chat from **+ → Connectors**.
+- **ChatGPT:** Settings → Security and login → turn on **Developer mode**. At chatgpt.com/plugins, add the URL with **No Authentication**, then pick it in a chat from **+ → Developer mode**.
 
-`settings.json`:
+Most other clients take this in their `mcp.json`. Cline, Zed, Open WebUI, Devin Desktop and the rest are covered step by step at [nodegrove.io/mcp](https://nodegrove.io/mcp#connect).
 
 ```json
-{ "context_servers": { "nodegrove-vram": { "url": "https://mcp.nodegrove.io/mcp" } } }
+{ "mcpServers": { "nodegrove-vram": { "url": "https://mcp.nodegrove.io/mcp" } } }
 ```
-</details>
-
-<details>
-<summary><b>ChatGPT</b></summary>
-
-Settings → Security and login → turn on **Developer mode**. At chatgpt.com/plugins, add one with the URL and **No Authentication**, then pick it in a chat from **+ → Developer mode**.
-</details>
 
 ### Local: over stdio
 

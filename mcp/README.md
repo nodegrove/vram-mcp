@@ -21,7 +21,7 @@ Over stdio, with Node.js 20 or newer:
 }
 ```
 
-Or remotely, with nothing to install: `https://mcp.nodegrove.io/mcp` (Streamable HTTP, no authentication). Setup for Claude, Cursor, VS Code, LM Studio, Open WebUI, Codex, Gemini CLI, Zed, ChatGPT and others is in the [repository README](https://github.com/nodegrove/vram-mcp#connect).
+Or remotely, with nothing to install: `https://mcp.nodegrove.io/mcp` (Streamable HTTP, no authentication). Setup for Claude, Cursor, VS Code, ChatGPT and other clients: [nodegrove.io/mcp](https://nodegrove.io/mcp#connect).
 
 ## Tools
 
