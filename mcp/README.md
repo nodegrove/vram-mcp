@@ -41,4 +41,4 @@ The local server sends nothing to Nodegrove. It contacts huggingface.co, and onl
 
 ## Licence
 
-MIT for the code; the bundled model and GPU data is [CC BY 4.0](LICENSE-DATA.md). Credit Nodegrove (nodegrove.io).
+MIT for the code; the bundled model and GPU data is [CC BY 4.0](LICENSE-DATA.md). Credit Nodegrove ([nodegrove.io](https://nodegrove.io)).

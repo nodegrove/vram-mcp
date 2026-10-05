@@ -60,4 +60,4 @@ const shape = shapeFromConfig(config); // layers, KV heads, cache groups, attent
 
 ## Licence
 
-The code is [MIT](LICENSE). The model and GPU tables, `src/models.ts` and `src/gpus.ts`, are [CC BY 4.0](LICENSE-DATA.md): use them for anything, and credit Nodegrove (nodegrove.io).
+The code is [MIT](LICENSE). The model and GPU tables, `src/models.ts` and `src/gpus.ts`, are [CC BY 4.0](LICENSE-DATA.md): use them for anything, and credit Nodegrove ([nodegrove.io](https://nodegrove.io)).

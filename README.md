@@ -30,7 +30,7 @@
 > - The smallest card here that runs it exactly as asked: **A100**, 80 GB usable.
 > - The biggest model your card does run at these settings, counting mixture-of-experts models at their dense equivalent: **Qwen3 32B**, 22.4 GB at ~37 tokens/s.
 
-That is the server's own answer, word for word. Every figure is a stated formula over the model's `config.json` and the card's published specs: no benchmarks, no guesses. It is free, read-only, and needs no account or key.
+That is the server's own answer, word for word, from the same code as the calculators on [nodegrove.io](https://nodegrove.io). Every figure is a stated formula over the model's `config.json` and the card's published specs: no benchmarks, no guesses. It is free, read-only, and needs no account or key.
 
 ## Connect
 
@@ -222,6 +222,6 @@ Found a figure that disagrees with its source? [Open an issue](https://github.co
 
 ## Licence
 
-The code is [MIT](LICENSE). The model and GPU data, `llm-math/src/models.ts` and `llm-math/src/gpus.ts`, is [CC BY 4.0](LICENSE-DATA.md): use it for anything, and credit Nodegrove (nodegrove.io).
+The code is [MIT](LICENSE). The model and GPU data, `llm-math/src/models.ts` and `llm-math/src/gpus.ts`, is [CC BY 4.0](LICENSE-DATA.md): use it for anything, and credit Nodegrove ([nodegrove.io](https://nodegrove.io)).
 
 Model and GPU names are trademarks of their owners.
