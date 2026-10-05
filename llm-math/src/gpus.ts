@@ -70,6 +70,9 @@ export const gpus: GpuSpec[] = [
   { id: 'm5-max', name: 'MacBook Pro M5 Max (unified)', vramGb: 128, bandwidthGBs: 614, kind: 'apple', maker: 'Apple', spec: 'https://www.apple.com/macbook-pro/specs/', note: 'Unified memory. 128 GB and 614 GB/s need the 40-core GPU; the 32-core GPU version is 36 GB at 460 GB/s.' },
   { id: 'm3-ultra', name: 'Mac Studio M3 Ultra (unified)', vramGb: 512, bandwidthGBs: 819, kind: 'apple', maker: 'Apple', spec: 'https://www.apple.com/newsroom/2025/03/apple-unveils-new-mac-studio-the-most-powerful-mac-ever/', bandwidthSource: { url: 'https://support.apple.com/en-us/122211', label: "Apple's M3 Ultra Mac Studio tech specs" }, note: "Unified memory. Launched configurable to 512 GB (Apple newsroom, March 2025); Apple's current spec page lists up to 256 GB." },
   { id: 'm5-ultra', name: 'Mac Studio M5 Ultra (unified)', vramGb: 512, bandwidthGBs: 1200, kind: 'apple', maker: 'Apple', spec: 'https://www.apple.com/mac-studio/specs/', note: 'Unified memory. 512 GB needs the 80-core GPU chip and ships in late October 2026; otherwise 96 or 256 GB, at the same 1.2 TB/s.' },
+  // Added 2026-10-06. Both NVIDIA pages print the memory and the bandwidth (fetched that day).
+  { id: 'rtx-pro-4000', name: 'RTX PRO 4000 Blackwell 24 GB', vramGb: 24, bandwidthGBs: 672, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4000/' },
+  { id: 'rtx-pro-4000-sff', name: 'RTX PRO 4000 Blackwell SFF 24 GB', vramGb: 24, bandwidthGBs: 432, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4000-sff/' },
 ];
 
 /**
