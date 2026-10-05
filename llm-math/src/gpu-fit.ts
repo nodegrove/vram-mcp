@@ -1,5 +1,5 @@
 /**
- * "What can this card run?" — the same arithmetic as the VRAM calculator and the
+ * "What can this card run?": the same arithmetic as the VRAM calculator and the
  * speed estimator, turned around to start from a GPU instead of a model.
  *
  * Nothing here is measured. Memory comes from the stated VRAM formula in vram.ts,
@@ -112,7 +112,7 @@ export interface GpuSummary {
   maxCapacity?: ModelFit;
   /** Best quality the card can hold: the same choice, made among models that fit at Q8. */
   bestQuality?: { m: ModelSpec; needGb: number };
-  /** Smallest model that does not fit — the first thing out of reach. */
+  /** Smallest model that does not fit: the first thing out of reach. */
   firstMiss?: ModelFit;
 }
 

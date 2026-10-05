@@ -120,9 +120,9 @@ export function check(
     const lower = quants.filter((x) => need(m, x.key, kvBytes).totalGb <= budget(g)).sort((a, b) => b.bytes - a.bytes)[0];
     if (lower) {
       const n = need(m, lower.key, kvBytes).totalGb;
-      tips.push({ kind: 'lower-quant', quant: lower.key, needGb: n, text: `Switch to **${lower.label}** — ${gb(n)}, which fits. Smaller quantisations cost accuracy; ${lower.key === 'q3' ? 'Q3 costs enough that a smaller model at Q4 is usually the better trade' : 'this one is a mild step'}.` });
+      tips.push({ kind: 'lower-quant', quant: lower.key, needGb: n, text: `Switch to **${lower.label}**: ${gb(n)}, which fits. Smaller quantisations cost accuracy; ${lower.key === 'q3' ? 'Q3 costs enough that a smaller model at Q4 is usually the better trade' : 'this one is a mild step'}.` });
     }
-    if (kvBytes === 2 && q8 <= budget(g)) tips.push({ kind: 'kv-q8', needGb: q8, text: `Quantise the **KV cache to Q8** — ${gb(q8)}, which fits. Most people never notice the difference.` });
+    if (kvBytes === 2 && q8 <= budget(g)) tips.push({ kind: 'kv-q8', needGb: q8, text: `Quantise the **KV cache to Q8**: ${gb(q8)}, which fits. Most people never notice the difference.` });
     if (mc >= 1024) tips.push({ kind: 'shorter-context', context: mc, text: `Keep ${q.label} but drop the context to **${tok(mc)} tokens**, the most this card holds for this model.` });
     else tips.push({ kind: 'no-context', needGb: e.weightsGb + e.overheadGb, text: `No context length helps: the weights alone are ${gb(e.weightsGb + e.overheadGb)} before a single token of conversation.` });
 
@@ -149,7 +149,7 @@ export function check(
     const higher = quants.filter((x) => x.bytes > q.bytes && need(m, x.key, kvBytes).totalGb <= budget(g)).sort((a, b) => b.bytes - a.bytes)[0];
     if (higher) {
       const n = need(m, higher.key, kvBytes).totalGb;
-      tips.push({ kind: 'higher-quant', quant: higher.key, needGb: n, text: `You have room for **${higher.label}** — ${gb(n)}. Higher precision is free quality when the memory is there.` });
+      tips.push({ kind: 'higher-quant', quant: higher.key, needGb: n, text: `You have room for **${higher.label}**: ${gb(n)}. Higher precision is free quality when the memory is there.` });
     }
     const larger = catalog.models
       .filter((x) => denseEquivalentB(x) > denseEquivalentB(m) && need(x, q.key, kvBytes).totalGb <= budget(g))
@@ -159,7 +159,7 @@ export function check(
       const t = tps(larger, g);
       tips.push({ kind: 'larger-model', modelId: larger.id, needGb: n, tokensPerSecond: t ?? undefined, text: `You could run a larger model: **${modelLink(larger)}** at ${gb(n)}${t === null ? '' : `, ${speedText(t)}`}.` });
     }
-    if (verdict === 'tight') tips.push({ kind: 'tight', text: `It fits, but above ${Math.round(TIGHT * 100)}% of memory. On a card with a display attached, treat this as a maybe — the desktop wants 0.5 to 2 GB of the same memory.` });
+    if (verdict === 'tight') tips.push({ kind: 'tight', text: `It fits, but above ${Math.round(TIGHT * 100)}% of memory. On a card with a display attached, treat this as a maybe: the desktop wants 0.5 to 2 GB of the same memory.` });
     if (mc > context) tips.push({ kind: 'longer-context', context: mc, text: `You can push the context to **${tok(mc)} tokens** before it stops fitting.` });
   }
 

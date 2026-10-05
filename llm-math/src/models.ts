@@ -24,7 +24,7 @@
  * successor: id of the newer model in the same family and role, when there is one.
  *
  * Adding a model: read config.json, do not copy another site's table. Then build nodegrove.io
- * and open one GPU page — the hand-written claims in its editorial notes must still agree
+ * and open one GPU page: the hand-written claims in its editorial notes must still agree
  * with the computed rows. Verify against the model card before relying on a number for a purchase.
  */
 import type { KvGroup } from './vram.ts';

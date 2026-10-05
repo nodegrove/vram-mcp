@@ -139,7 +139,7 @@ export function maxContextTokens(m: KvShape & { params: number }, quant: QuantKe
 /**
  * How much model this is, for choosing between models without quoting a benchmark.
  * A dense model counts at its parameter count. A mixture-of-experts model counts at
- * the geometric mean of total and active parameters — the usual rule of thumb: it
+ * the geometric mean of total and active parameters, the usual rule of thumb: it
  * knows more than its active size and reasons less than its total. It is a rule of
  * thumb, and the pages say so. Lives here, not in gpu-fit.ts, so the browser tools
  * can import it without pulling the whole data set into their bundle.

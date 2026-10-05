@@ -6,7 +6,7 @@
  *
  *   tokens/s ≈ efficiency × bandwidth (GB/s) ÷ active-weight bytes (GB)
  *
- * Real runtimes reach 60–80% of that ceiling on a good day (kernel overhead,
+ * Real runtimes reach 60-80% of that ceiling on a good day (kernel overhead,
  * KV cache reads, sampling). We use 0.7 and say so. For mixture-of-experts models
  * only the active parameters are read per token, which is why they are fast.
  * This ignores prompt processing (which is compute-bound and much faster per token)
