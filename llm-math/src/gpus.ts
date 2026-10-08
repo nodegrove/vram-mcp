@@ -73,6 +73,36 @@ export const gpus: GpuSpec[] = [
   // Added 2026-10-06. Both NVIDIA pages print the memory and the bandwidth (fetched that day).
   { id: 'rtx-pro-4000', name: 'RTX PRO 4000 Blackwell 24 GB', vramGb: 24, bandwidthGBs: 672, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4000/' },
   { id: 'rtx-pro-4000-sff', name: 'RTX PRO 4000 Blackwell SFF 24 GB', vramGb: 24, bandwidthGBs: 432, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4000-sff/' },
+  // Added 2026-10-09. Every figure fetched from the cited page that day.
+  { id: 'rtx-5080', name: 'RTX 5080 16 GB', vramGb: 16, bandwidthGBs: 960, kind: 'consumer', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/', bandwidthSource: GEFORCE_50_COMPARE },
+  { id: 'rtx-5070-ti', name: 'RTX 5070 Ti 16 GB', vramGb: 16, bandwidthGBs: 896, kind: 'consumer', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5070-family/', bandwidthSource: GEFORCE_50_COMPARE },
+  { id: 'rtx-5070', name: 'RTX 5070 12 GB', vramGb: 12, bandwidthGBs: 672, kind: 'consumer', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5070-family/', bandwidthSource: GEFORCE_50_COMPARE },
+  { id: 'rtx-4080-super', name: 'RTX 4080 SUPER 16 GB', vramGb: 16, bandwidthGBs: 736, kind: 'consumer', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4080-family/', bandwidthCalc: { busBits: 256, gbps: 23, gbpsSource: { url: 'https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4080-4070-ti-4070-super-gpu/', label: "NVIDIA's RTX 40 SUPER launch article" } } },
+  { id: 'rtx-a6000', name: 'RTX A6000 48 GB', vramGb: 48, bandwidthGBs: 768, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/rtx-a6000/', bandwidthSource: { url: 'https://www.nvidia.com/content/dam/en-zz/Solutions/products/workstations/nvidia-rtx-a6000-datasheet.pdf', label: "NVIDIA's RTX A6000 datasheet" } },
+  { id: 'rtx-pro-5000', name: 'RTX PRO 5000 Blackwell 48 GB', vramGb: 48, bandwidthGBs: 1344, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-5000/', note: 'A 72 GB version has the same 1,344 GB/s and 300 W (one figure printed for both on NVIDIA\'s page).' },
+  { id: 'rtx-pro-4500', name: 'RTX PRO 4500 Blackwell 32 GB', vramGb: 32, bandwidthGBs: 896, kind: 'workstation', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4500/' },
+  // Added 2026-10-09. Every figure fetched from the cited maker page that day; each spec page prints its own bandwidth.
+  // AMD pages for RDNA 3 also print an "Effective Memory Bandwidth" that counts Infinity Cache; never use that one.
+  { id: 'rx-9070-xt', name: 'Radeon RX 9070 XT 16 GB', vramGb: 16, bandwidthGBs: 640, kind: 'consumer', maker: 'AMD', spec: 'https://www.amd.com/en/products/graphics/desktops/radeon/9000-series/amd-radeon-rx-9070xt.html' },
+  { id: 'rx-9060-xt-16', name: 'Radeon RX 9060 XT 16 GB', vramGb: 16, bandwidthGBs: 320, kind: 'consumer', maker: 'AMD', spec: 'https://www.amd.com/en/products/graphics/desktops/radeon/9000-series/amd-radeon-rx-9060xt.html' },
+  { id: 'rx-7900-xt', name: 'Radeon RX 7900 XT 20 GB', vramGb: 20, bandwidthGBs: 800, kind: 'consumer', maker: 'AMD', spec: 'https://www.amd.com/en/products/graphics/desktops/radeon/7000-series/amd-radeon-rx-7900xt.html' },
+  { id: 'radeon-ai-pro-r9700', name: 'Radeon AI PRO R9700 32 GB', vramGb: 32, bandwidthGBs: 640, kind: 'workstation', maker: 'AMD', spec: 'https://www.amd.com/en/products/graphics/workstations/radeon-ai-pro/ai-9000-series/amd-radeon-ai-pro-r9700.html' },
+  { id: 'arc-b580', name: 'Arc B580 12 GB', vramGb: 12, bandwidthGBs: 456, kind: 'consumer', maker: 'Intel', spec: 'https://www.intel.com/content/www/us/en/products/sku/241598/intel-arc-b580-graphics/specifications.html' },
+  { id: 'arc-pro-b60', name: 'Arc Pro B60 24 GB', vramGb: 24, bandwidthGBs: 456, kind: 'workstation', maker: 'Intel', spec: 'https://www.intel.com/content/www/us/en/products/sku/243916/intel-arc-pro-b60-graphics/specifications.html' },
+  { id: 'arc-pro-b70', name: 'Arc Pro B70 32 GB', vramGb: 32, bandwidthGBs: 608, kind: 'workstation', maker: 'Intel', spec: 'https://www.intel.com/content/www/us/en/products/sku/245797/intel-arc-pro-b70-graphics/specifications.html' },
+  { id: 'mac-mini-m4-pro', name: 'Mac mini M4 Pro (unified)', vramGb: 64, bandwidthGBs: 273, kind: 'apple', maker: 'Apple', spec: 'https://support.apple.com/en-us/121555', note: "Unified memory: 24 GB, configurable to 48 or 64 GB. Apple's current Mac mini spec page lists the M5 Pro instead." },
+  { id: 'mac-mini-m5-pro', name: 'Mac mini M5 Pro (unified)', vramGb: 64, bandwidthGBs: 307, kind: 'apple', maker: 'Apple', spec: 'https://support.apple.com/en-us/128108', note: 'Unified memory: 24 GB, configurable to 48 or 64 GB. Apple prints one bandwidth for the M5 Pro, with or without the 20-core GPU upgrade.' },
+  // Added 2026-10-09. The product page prints the memory; NVIDIA's developer guide prints the
+  // bandwidth and the rule for the GPU's share (fetched that day). The share: a reserved block
+  // C, plus a shared region of the rest less 16 GB, held between 50% and 80% of the rest. On
+  // 128 GB that is 102.4 + 0.2C GB for any C up to 48 GB, and 112 GB above it; NVIDIA prints no
+  // C, so the floor is used.
+  {
+    id: 'rtx-spark', name: 'RTX Spark 128 GB (unified)', vramGb: 128, bandwidthGBs: 300, kind: 'unified', maker: 'NVIDIA', spec: 'https://www.nvidia.com/en-us/products/rtx-spark/',
+    bandwidthSource: { url: 'https://docs.nvidia.com/rtx-spark/rtx-spark-porting-guide/latest/overview.html', label: "NVIDIA's RTX Spark porting guide" },
+    gpuMemory: { gb: 102, rule: 'NVIDIA reserves a block of memory for the GPU and lets it share 50 to 80% of the rest under Windows, but does not print the size of the reserved block. Whatever that size, the GPU can address at least 102 GB of a 128 GB machine, and figures here use 102 GB.', source: { url: 'https://docs.nvidia.com/rtx-spark/rtx-spark-porting-guide/latest/uma/index.html', label: "NVIDIA's RTX Spark unified-memory guide" } },
+    note: 'Unified memory shared with the Arm CPU under Windows 11. Laptops go on sale on 16 October 2026 and compact desktops in November; a version with a smaller GPU goes up to 64 GB.',
+  },
 ];
 
 /**
