@@ -94,8 +94,11 @@ export function sourceLinks(m: ModelSpec) {
  * rack-class, Qwen-Image 2.1 is for the create cluster). 2026-10-06: Muse Glimmer 30B added
  * from its config.json; hf-verify 30 of 30, 52 links. Qwen3.8-Flash-Next is left out: its
  * 51B n-gram embedding is meant to sit in system memory, which this math does not model.
+ * 2026-10-09: Qwen3.6 27B, Granite 4.2 8B and Granite 4.2 30B added from their config.json.
+ * K2-Horizon-MoVA is left out until its mixture-of-values attention's cache is read from the
+ * modelling code.
  */
-export const MODELS_UPDATED = '2026-10-06';
+export const MODELS_UPDATED = '2026-10-09';
 
 const VISION = 'The parameter count includes the vision encoder; a text-only GGUF is slightly smaller.';
 
@@ -109,6 +112,7 @@ export const models: ModelSpec[] = [
   },
   { id: 'llama-3.1-8b', name: 'Llama 3.1 8B', family: 'Llama', params: 8.0, layers: 32, kvHeads: 8, headDim: 128, released: '2024-07', ctx: 131072, license: 'llama', source: 'meta-llama/Llama-3.1-8B config.json' },
   { id: 'qwen3-8b', name: 'Qwen3 8B', family: 'Qwen', params: 8.2, layers: 36, kvHeads: 8, headDim: 128, released: '2025-04', ctx: 40960, license: 'apache', successor: 'qwen3.5-9b', source: 'Qwen/Qwen3-8B config.json' },
+  { id: 'granite-4.2-8b', name: 'Granite 4.2 8B', family: 'Granite', params: 8.8, layers: 40, kvHeads: 8, headDim: 128, released: '2026-08', ctx: 131072, license: 'apache', source: 'ibm-granite/granite-4.2-8b config.json' },
   {
     id: 'qwen3.5-9b', name: 'Qwen3.5 9B', family: 'Qwen', params: 9.7, layers: 32, kvHeads: 4, headDim: 256,
     kv: [{ layers: 8, width: 2048 }], stateGb: 0.05,
@@ -151,11 +155,18 @@ export const models: ModelSpec[] = [
     released: '2025-03', ctx: 131072, license: 'gemma', successor: 'gemma-4-31b', note: 'A runtime without a sliding-window cache stores every layer at full length and needs far more than this at long context.', source: 'google/gemma-3-27b-it config.json',
   },
   {
+    id: 'qwen3.6-27b', name: 'Qwen3.6 27B', family: 'Qwen', params: 27.8, layers: 64, kvHeads: 4, headDim: 256,
+    kv: [{ layers: 16, width: 2048 }], stateGb: 0.15,
+    arch: '64 layers, of which only 16 are full attention (4 KV heads of dimension 256) and keep a cache that grows with the conversation; the other 48 are Gated DeltaNet linear-attention layers with a fixed state of about 0.15 GB',
+    released: '2026-04', ctx: 262144, license: 'apache', successor: 'qwen3.8-27b', note: VISION, source: 'Qwen/Qwen3.6-27B config.json',
+  },
+  {
     id: 'qwen3.8-27b', name: 'Qwen3.8 27B', family: 'Qwen', params: 27.8, layers: 64, kvHeads: 4, headDim: 256,
     kv: [{ layers: 16, width: 2048 }], stateGb: 0.15,
     arch: '64 layers, of which only 16 are full attention (4 KV heads of dimension 256) and keep a cache that grows with the conversation; the other 48 are Gated DeltaNet linear-attention layers with a fixed state of about 0.15 GB',
     released: '2026-08', ctx: 262144, license: 'apache', note: VISION, source: 'Qwen/Qwen3.8-27B config.json',
   },
+  { id: 'granite-4.2-30b', name: 'Granite 4.2 30B', family: 'Granite', params: 29.3, layers: 64, kvHeads: 8, headDim: 128, released: '2026-08', ctx: 131072, license: 'apache', source: 'ibm-granite/granite-4.2-30b config.json' },
   {
     id: 'muse-glimmer-30b', name: 'Muse Glimmer 30B', family: 'Muse', params: 29.8, layers: 52, kvHeads: 2, headDim: 128,
     kv: [{ layers: 13, width: 512 }, { layers: 39, width: 512, window: 2048 }],
