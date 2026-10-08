@@ -25,6 +25,20 @@ export interface CheckModel extends KvShape {
   active?: number | null;
   /** Native context window, tokens. Absent when unknown: then no window caps the search, and none is exceeded. */
   ctx?: number;
+  /** Set for a coding or reasoning-distilled specialist: the tips offer one only to someone asking about the same kind of model. */
+  role?: 'code' | 'reasoning';
+  /** Id of the newer model in the same family: when both run on the card, the tips name the newer one. */
+  successor?: string;
+}
+
+/**
+ * Out of the models that run on a card, the ones worth offering as an alternative to the one
+ * asked about: not a specialist unless the question was about the same kind of model, and not
+ * one whose newer successor also runs there (Qwen3 32B fits a 24 GB card, and so does
+ * Qwen3.8 27B, which replaced it). check() names its alternatives from this list.
+ */
+export function worthNaming<T extends Pick<CheckModel, 'id' | 'role' | 'successor'>>(runs: readonly T[], asked: Pick<CheckModel, 'role'>): T[] {
+  return runs.filter((x) => (!x.role || x.role === asked.role) && !(x.successor && runs.some((y) => y.id === x.successor)));
 }
 
 export type SuggestionKind =
@@ -137,7 +151,7 @@ export function check(
     }
     if (smallest) tips.push({ kind: 'smallest-card', cardId: smallest.id, needGb: e.totalGb, text: `The smallest card here that runs it exactly as asked: **${cardLink(smallest)}**, ${gb(smallest.usableGb)} usable.` });
 
-    const runnable = catalog.models.filter((x) => need(x, q.key, kvBytes).totalGb <= budget(g));
+    const runnable = worthNaming(catalog.models.filter((x) => need(x, q.key, kvBytes).totalGb <= budget(g)), m);
     const biggest = [...runnable].sort((a, b) => denseEquivalentB(b) - denseEquivalentB(a))[0];
     if (biggest) {
       const n = need(biggest, q.key, kvBytes).totalGb;
@@ -151,8 +165,8 @@ export function check(
       const n = need(m, higher.key, kvBytes).totalGb;
       tips.push({ kind: 'higher-quant', quant: higher.key, needGb: n, text: `You have room for **${higher.label}**: ${gb(n)}. Higher precision is free quality when the memory is there.` });
     }
-    const larger = catalog.models
-      .filter((x) => denseEquivalentB(x) > denseEquivalentB(m) && need(x, q.key, kvBytes).totalGb <= budget(g))
+    const larger = worthNaming(catalog.models.filter((x) => need(x, q.key, kvBytes).totalGb <= budget(g)), m)
+      .filter((x) => denseEquivalentB(x) > denseEquivalentB(m))
       .sort((a, b) => denseEquivalentB(b) - denseEquivalentB(a))[0];
     if (larger) {
       const n = need(larger, q.key, kvBytes).totalGb;

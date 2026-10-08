@@ -4,7 +4,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { check, cardOf, models, gpus, modelById, speedText, checkerUrl, calculatorUrl, GROVE_GB, type QuantKey } from '../src/index.ts';
+import { check, cardOf, models, gpus, modelById, speedText, checkerUrl, calculatorUrl, worthNaming, GROVE_GB, type QuantKey } from '../src/index.ts';
 
 const cards = gpus.map(cardOf);
 const run = (gpu: string, model: string, quant: QuantKey, context: number, kvBytes = 2) =>
@@ -22,13 +22,28 @@ test('a 70B model on a 24 GB card: no, and what would work', () => {
   assert.deepEqual(kinds(r), ['no-context', 'near-miss-card', 'smallest-card', 'biggest-model']);
   assert.equal(r.suggestions[1]!.cardId, 'rtx-6000-ada');
   assert.equal(r.suggestions[2]!.cardId, 'a100-80');
-  assert.equal(r.suggestions[3]!.modelId, 'qwen3-32b');
+  // Not Qwen3 32B: its successor Qwen3.8 27B runs here too. Not the 32B coding or reasoning
+  // specialists either: the question was about a general model.
+  assert.equal(r.suggestions[3]!.modelId, 'gemma-4-31b');
   assert.equal(r.tokensPerSecond, null);
   assert.equal(r.groveGb, 96);
   assert.equal(
     r.suggestions[1]!.text,
     '**[RTX 6000 Ada 48 GB](/gpus/rtx-6000-ada)** (48 GB) is within a whisker: 45.8 GB against 45.6 GB after headroom. With the KV cache at Q8 it needs 44.4 GB and fits.',
   );
+});
+
+test('alternatives: no superseded model, and specialists only for the same kind of question', () => {
+  const byId = (id: string) => modelById(id)!;
+  // Both run: the older one is dropped in favour of its successor.
+  assert.deepEqual(worthNaming([byId('qwen3-32b'), byId('qwen3.8-27b')], byId('llama-3.3-70b')).map((m) => m.id), ['qwen3.8-27b']);
+  // The successor does not run: the older one stays.
+  assert.deepEqual(worthNaming([byId('qwen3-32b')], byId('llama-3.3-70b')).map((m) => m.id), ['qwen3-32b']);
+  // A coding model is offered to someone asking about a coding model, not to someone asking about a general one.
+  assert.deepEqual(worthNaming([byId('qwen2.5-coder-32b'), byId('gemma-4-31b')], byId('llama-3.3-70b')).map((m) => m.id), ['gemma-4-31b']);
+  const coder = run('rtx-4090', 'qwen3-coder-next', 'q4', 8192);
+  assert.equal(coder.verdict, 'no');
+  assert.equal(coder.suggestions.find((s) => s.kind === 'biggest-model')!.modelId, 'qwen2.5-coder-32b');
 });
 
 test('a near miss: every way to make it fit, in order', () => {
