@@ -28,7 +28,7 @@
 > - No context length helps: the weights alone are 43.1 GB before a single token of conversation.
 > - **RTX 6000 Ada** (48 GB) is within a whisker: 45.8 GB against 45.6 GB after headroom. With the KV cache at Q8 it needs 44.4 GB and fits.
 > - The smallest card here that runs it exactly as asked: **A100**, 80 GB usable.
-> - The biggest model your card does run at these settings, counting mixture-of-experts models at their dense equivalent: **Qwen3 32B**, 22.4 GB at ~37 tokens/s.
+> - The biggest model your card does run at these settings, counting mixture-of-experts models at their dense equivalent: **Gemma 4 31B**, 20.9 GB at ~39 tokens/s.
 
 That is the server's own answer, word for word, from the same code as the [GPU compatibility checker](https://nodegrove.io/tools/can-i-run-it) on nodegrove.io. Every figure is a stated formula over the model's `config.json` and the card's published specs: no benchmarks, no guesses. It is free, read-only, and needs no account or key.
 
