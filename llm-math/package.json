@@ -1,6 +1,6 @@
 {
   "name": "@nodegrove/llm-math",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "How much VRAM an open LLM needs and how fast it can run on a GPU: the memory, KV-cache and speed arithmetic behind nodegrove.io, with model data read from config.json and GPU specs from the makers.",
   "type": "module",
   "license": "(MIT AND CC-BY-4.0)",
