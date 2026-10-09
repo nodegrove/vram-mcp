@@ -56,6 +56,13 @@ test('names resolve the way people type them, and ties are asked back', () => {
   assert.equal(resolveCard({ gpu: 'NVIDIA A100' }).card.id, 'a100-80');
   assert.throws(() => resolveCard({ gpu: '24 GB' }), (e: Error) => e instanceof ToolInputError && /rtx-3090.*rtx-4090/.test(e.message));
   assert.throws(() => resolveCard({ gpu: 'RTX 4080' }), /vram_gb/);
+  // A variant suffix is a different card: it matches only when the query says it.
+  assert.equal(resolveCard({ gpu: 'RTX 4080 SUPER' }).card.id, 'rtx-4080-super');
+  assert.equal(resolveCard({ gpu: 'RTX 5070' }).card.id, 'rtx-5070');
+  assert.equal(resolveCard({ gpu: 'RTX 5070 Ti' }).card.id, 'rtx-5070-ti');
+  assert.equal(resolveCard({ gpu: 'RTX PRO 4000' }).card.id, 'rtx-pro-4000');
+  assert.equal(resolveCard({ gpu: '7900 XT' }).card.id, 'rx-7900-xt');
+  assert.throws(() => resolveCard({ gpu: 'RX 9070' }), /vram_gb/);
 });
 
 test('a model name that fits two rows picks the closer one and names the other', async () => {

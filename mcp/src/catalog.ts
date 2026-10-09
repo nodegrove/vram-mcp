@@ -23,14 +23,20 @@ const GPU_NOISE = new Set(['nvidia', 'geforce', 'amd', 'radeon', 'apple', 'intel
 const indexOf = <T>(items: readonly T[], names: (t: T) => string[]) => items.map((item) => ({ item, words: new Set(names(item).flatMap(words)) }));
 const MODEL_INDEX = indexOf(models, (m) => [m.name, m.id]);
 const GPU_INDEX = indexOf(gpus, (g) => [g.name, g.id, `${g.vramGb} gb`]);
+/**
+ * Suffixes that make a different card with the same number: "RTX 4080" is not the RTX 4080
+ * SUPER, and "RX 9070" is not the RX 9070 XT. A card whose name carries one only matches a
+ * query that says it.
+ */
+const GPU_VARIANTS = new Set(['super', 'ti', 'xt', 'xtx', 'sff']);
 
 export type Match<T> = { ok: true; item: T; alsoMatched: T[] } | { ok: false; candidates: T[] };
 
-function matchBy<T>(query: string, index: { item: T; words: Set<string> }[], noise: Set<string>): Match<T> {
+function matchBy<T>(query: string, index: { item: T; words: Set<string> }[], noise: Set<string>, variants: Set<string> = new Set()): Match<T> {
   const q = words(query).filter((w) => !noise.has(w));
   if (q.length === 0) return { ok: false, candidates: [] };
   const scored = index
-    .filter((e) => q.every((w) => e.words.has(w)))
+    .filter((e) => q.every((w) => e.words.has(w)) && [...e.words].every((w) => !variants.has(w) || q.includes(w)))
     .map((e) => ({ item: e.item, extra: [...e.words].filter((w) => !q.includes(w) && !noise.has(w)).length }))
     .sort((a, b) => a.extra - b.extra);
   if (scored.length === 0) return { ok: false, candidates: [] };
@@ -66,7 +72,7 @@ export function findGpu(query: string): Match<GpuSpec> {
   const s = query.trim();
   const byId = gpus.find((g) => g.id.toLowerCase() === s.toLowerCase());
   if (byId) return { ok: true, item: byId, alsoMatched: [] };
-  return matchBy(s, GPU_INDEX, GPU_NOISE);
+  return matchBy(s, GPU_INDEX, GPU_NOISE, GPU_VARIANTS);
 }
 
 const listOf = (names: string[]) => (names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} or ${names.at(-1)}`);
