@@ -1,7 +1,8 @@
 /**
  * Reading config.json must reproduce the model table, row for row. The fixtures are the
- * cache-relevant keys of each model's real config.json (fetched 2026-10-02); all 29 rows
- * were checked against their live configs the same way before this reader shipped.
+ * cache-relevant keys of each model's real config.json (fetched 2026-10-02; Nemotron 3.5 Bolt
+ * 2026-10-16, a config with a list of layer kinds and no layer count); all 29 rows were checked
+ * against their live configs the same way before this reader shipped.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -58,7 +58,9 @@ export function shapeFromConfig(config: Cfg): ConfigShape {
   };
   const warnings: string[] = [];
 
-  const layers = pick('num_hidden_layers', 'n_layer', 'num_layers', 'n_layers');
+  // Some configs (NVIDIA's Puzzle-compressed Nemotrons) give only the list of layer kinds.
+  const listed = Array.isArray(c.layer_types) ? c.layer_types.length : Array.isArray(c.layers_block_type) ? c.layers_block_type.length : undefined;
+  const layers = pick('num_hidden_layers', 'n_layer', 'num_layers', 'n_layers') ?? num(listed);
   const heads = pick('num_attention_heads', 'n_head', 'num_heads');
   if (!layers || !heads) throw new ConfigError('config.json has no layer count or attention-head count that this reader knows.');
   const kvHeads = pick('num_key_value_heads', 'num_kv_heads', 'n_head_kv') ?? heads;
