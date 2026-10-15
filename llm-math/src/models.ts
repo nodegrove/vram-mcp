@@ -97,8 +97,10 @@ export function sourceLinks(m: ModelSpec) {
  * 2026-10-09: Qwen3.6 27B, Granite 4.2 8B and Granite 4.2 30B added from their config.json.
  * K2-Horizon-MoVA is left out until its mixture-of-values attention's cache is read from the
  * modelling code.
+ * 2026-10-16: Nemotron 3.5 Bolt 74B-A9B added from its config.json (layer kinds from
+ * layers_block_type, which its config gives instead of num_hidden_layers).
  */
-export const MODELS_UPDATED = '2026-10-09';
+export const MODELS_UPDATED = '2026-10-16';
 
 const VISION = 'The parameter count includes the vision encoder; a text-only GGUF is slightly smaller.';
 
@@ -203,6 +205,12 @@ export const models: ModelSpec[] = [
   },
   { id: 'llama-3.3-70b', name: 'Llama 3.3 70B', family: 'Llama', params: 70.6, layers: 80, kvHeads: 8, headDim: 128, released: '2024-12', ctx: 131072, license: 'llama', source: 'meta-llama/Llama-3.3-70B-Instruct config.json' },
   { id: 'deepseek-r1-distill-llama-70b', name: 'DeepSeek-R1 Distill Llama 70B', family: 'DeepSeek', params: 70.6, layers: 80, kvHeads: 8, headDim: 128, released: '2025-01', ctx: 131072, license: 'mit', role: 'reasoning', source: 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B config.json' },
+  {
+    id: 'nemotron-3.5-bolt-74b-a9b', name: 'Nemotron 3.5 Bolt 74B-A9B (MoE)', family: 'Nemotron', params: 74.9, active: 9, layers: 88, kvHeads: 2, headDim: 128,
+    kv: [{ layers: 8, width: 512 }], stateGb: 0.17,
+    arch: '88 blocks, of which only 8 are attention layers (2 KV heads of dimension 128); 40 are Mamba-2 layers with a small fixed state and 40 are mixture-of-experts layers with no cache at all',
+    released: '2026-10', ctx: 262144, license: 'openmdw', note: 'NVIDIA\'s own 24GB release is a native 2-bit build, below the lowest row computed here: its GGUF weights are 22.0 GB, and the vision encoder comes as a separate 1.7 GB file.', source: 'nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-BF16 config.json and model card',
+  },
   {
     id: 'qwen3-coder-next', name: 'Qwen3-Coder-Next 80B-A3B (MoE)', family: 'Qwen', params: 79.7, active: 3, layers: 48, kvHeads: 2, headDim: 256,
     kv: [{ layers: 12, width: 1024 }], stateGb: 0.08,
